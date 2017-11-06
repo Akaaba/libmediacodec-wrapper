@@ -31,16 +31,48 @@
 
 
 struct mcw *mcw_new(
-	void)
+	struct mcw_jnienv *jnienv,
+	enum mcw_implementation implem)
 {
 	int ret = 0;
 	struct mcw *self = calloc(1, sizeof(*self));
 	MCW_RETURN_VAL_IF_FAILED(self != NULL, -ENOMEM, NULL);
 
-	ret = mcw_ndk_init(self);
-	if (ret != 0) {
-		MCW_LOGE("mcw_ndk_init() failed: %d(%s)", ret, strerror(-ret));
-		goto error;
+	switch (implem) {
+	default:
+	case MCW_IMPLEMENTATION_AUTO:
+		ret = mcw_ndk_init(self);
+		if (ret != 0) {
+			MCW_LOGI("mcw_ndk_init() failed: %d(%s)",
+				ret, strerror(-ret));
+			ret = mcw_jni_init(self, jnienv);
+			if (ret != 0) {
+				MCW_LOGE("mcw_jni_init() failed: %d(%s)",
+					ret, strerror(-ret));
+				goto error;
+			} else
+				MCW_LOGI("using JNI implementation");
+		} else
+			MCW_LOGI("using NDK implementation");
+		break;
+	case MCW_IMPLEMENTATION_NDK:
+		ret = mcw_ndk_init(self);
+		if (ret != 0) {
+			MCW_LOGE("mcw_ndk_init() failed: %d(%s)",
+				ret, strerror(-ret));
+			goto error;
+		} else
+			MCW_LOGI("using NDK implementation");
+		break;
+	case MCW_IMPLEMENTATION_JNI:
+		ret = mcw_jni_init(self, jnienv);
+		if (ret != 0) {
+			MCW_LOGW("mcw_jni_init() failed: %d(%s)",
+				ret, strerror(-ret));
+			goto error;
+		} else
+			MCW_LOGI("using JNI implementation");
+		break;
 	}
 
 	return self;

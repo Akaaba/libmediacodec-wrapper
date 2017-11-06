@@ -38,6 +38,13 @@ extern "C" {
 #include <android/native_window.h>
 
 
+enum mcw_implementation {
+	MCW_IMPLEMENTATION_AUTO = 0,
+	MCW_IMPLEMENTATION_NDK,
+	MCW_IMPLEMENTATION_JNI,
+};
+
+
 enum mcw_media_status {
 	MCW_MEDIA_STATUS_OK = 0,
 
@@ -56,12 +63,17 @@ enum mcw_media_status {
 };
 
 
-#define MCW_BUFFER_FLAG_END_OF_STREAM 	4
-#define MCW_CONFIGURE_FLAG_ENCODE	1
-#define MCW_INFO_OUTPUT_BUFFERS_CHANGED	-3
-#define MCW_INFO_OUTPUT_FORMAT_CHANGED	-2
-#define MCW_INFO_TRY_AGAIN_LATER	-1
-
+#define MCW_BUFFER_FLAG_KEY_FRAME			1
+#define MCW_BUFFER_FLAG_CODEC_CONFIG			2
+#define MCW_BUFFER_FLAG_END_OF_STREAM			4
+#define MCW_CONFIGURE_FLAG_ENCODE			1
+#define MCW_INFO_OUTPUT_BUFFERS_CHANGED			-3
+#define MCW_INFO_OUTPUT_FORMAT_CHANGED			-2
+#define MCW_INFO_TRY_AGAIN_LATER			-1
+#define MCW_COLOR_FORMAT_YUV420_PLANAR			0x00000013
+#define MCW_COLOR_FORMAT_YUV420_SEMIPLANAR		0x00000015
+#define MCW_COLOR_FORMAT_QCOM_YUV420PackedSemiPlanar64x32Tile2m8ka 0x7FA30C03
+#define MCW_COLOR_FORMAT_QCOM_YUV420SemiPlanar32m	0x7FA30C04
 
 struct mcw_mediaformat;
 
@@ -301,8 +313,12 @@ struct mcw {
 };
 
 
+struct mcw_jnienv;
+
+
 struct mcw *mcw_new(
-	void);
+	struct mcw_jnienv *jnienv,
+	enum mcw_implementation implem);
 
 
 int mcw_destroy(

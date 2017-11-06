@@ -31,4 +31,7 @@
 #include "mcw.h"
 
 
+int mcw_jni_init(struct mcw *mcw, struct mcw_jnienv *jnienv);
+
+
 #endif /* !_MCW_JNI_H_ */
